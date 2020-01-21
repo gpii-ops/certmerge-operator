@@ -164,7 +164,7 @@ func (r *ReconcileCertMerge) SecretTriggerCertMerge(o handler.MapObject) []recon
 	}
 
 	// Get all CertMerges
-	if err := r.client.List(context.TODO(), cml, nil); err != nil {
+	if err := r.client.List(context.TODO(), cml); err != nil {
 		return result
 	}
 
