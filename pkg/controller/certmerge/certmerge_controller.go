@@ -164,7 +164,7 @@ func (r *ReconcileCertMerge) SecretTriggerCertMerge(o handler.MapObject) []recon
 	}
 
 	// Get all CertMerges
-	if err := r.client.List(context.TODO(), nil, cml); err != nil {
+	if err := r.client.List(context.TODO(), cml); err != nil {
 		return result
 	}
 
@@ -433,7 +433,7 @@ func (r *ReconcileCertMerge) searchSecretByLabel(ctx context.Context, ls metav1.
 	}
 
 	// search
-	if err := r.client.List(ctx, listOps, sec); err != nil {
+	if err := r.client.List(ctx, sec, listOps); err != nil {
 		return nil, err
 	}
 
