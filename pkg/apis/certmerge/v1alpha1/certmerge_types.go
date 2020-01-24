@@ -33,10 +33,18 @@ func init() {
 
 // CertMergeSpec defines the desired state of CertMerge
 type CertMergeSpec struct {
+	Notify          []NotifySpec       `json:"notify"`
 	SecretName      string             `json:"name"`
 	Selector        []SecretSelector   `json:"selector"`
 	SecretNamespace string             `json:"namespace"`
 	SecretList      []SecretDefinition `json:"secretlist"`
+}
+
+// NotifySpec defines resources to notify on cert update
+type NotifySpec struct {
+	Type      string `json:"type"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // SecretSelector defines the needed parameters to search for secrets by Label
