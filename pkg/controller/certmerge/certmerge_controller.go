@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	certmergev1alpha1 "github.com/prune998/certmerge-operator/pkg/apis/certmerge/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -343,6 +344,9 @@ func (r *ReconcileCertMerge) Reconcile(request reconcile.Request) (reconcile.Res
 				return emptyRes, err
 			}
 
+			// Notify interested parties
+			r.notify(ctx, instance.Spec.Notify)
+
 			// Secret created successfully - don't requeue
 			return emptyRes, nil
 		}
@@ -363,7 +367,25 @@ func (r *ReconcileCertMerge) Reconcile(request reconcile.Request) (reconcile.Res
 		}).Errorf("Error updating Secret %s/%s - %v\n", secret.Namespace, secret.Name, err)
 		return emptyRes, err
 	}
+
+	// Notify interested parties
+	r.notify(ctx, instance.Spec.Notify)
+
 	return emptyRes, nil
+}
+
+func (r *ReconcileCertMerge) notify(ctx context.Context, nl []certmergev1alpha1.NotifySpec) {
+	for _, n := range nl {
+		if n.Type == "deployment" {
+
+			err := r.updateDeployment(ctx, n.Name, n.Namespace)
+			if err != nil {
+				log.Errorf("Error - failed to notify %s %s/%s", n.Type, n.Namespace, n.Name)
+			}
+		} else {
+			log.Errorf("Error - %s notification type is not supported", n.Type)
+		}
+	}
 }
 
 // newSecretForCR returns an empty secret for holding the secrets merge
@@ -438,4 +460,33 @@ func (r *ReconcileCertMerge) searchSecretByLabel(ctx context.Context, ls metav1.
 	}
 
 	return sec, nil
+}
+
+// Update Deployment spec annotation to trigger rolling restart
+func (r *ReconcileCertMerge) updateDeployment(ctx context.Context, name, namespace string) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
+	defer cancel()
+
+	dep := &appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+
+	if err := r.client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, dep); err != nil {
+		return err
+	}
+
+	dep.Spec.Template.Annotations["certmerge.lecentre.net/timestamp"] = time.Now().Format(time.RFC3339)
+
+	if err := r.client.Update(ctx, dep); err != nil {
+		return err
+	}
+
+	return nil
 }
