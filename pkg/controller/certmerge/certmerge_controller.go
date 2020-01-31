@@ -316,7 +316,7 @@ func (r *ReconcileCertMerge) Reconcile(request reconcile.Request) (reconcile.Res
 				log.WithFields(log.Fields{
 					"certmerge": instance.Name,
 					"namespace": instance.Namespace,
-				}).Infof("adding cert %s/%s to %s/%s", secCert.Namespace, secCert.Name, instance.Spec.SecretNamespace, instance.Spec.SecretName)
+				}).Infof("Adding cert %s/%s to %s/%s", secCert.Namespace, secCert.Name, instance.Spec.SecretNamespace, instance.Spec.SecretName)
 				certData[secCert.Name+".crt"] = secCert.Data["tls.crt"]
 				certData[secCert.Name+".key"] = secCert.Data["tls.key"]
 			}
@@ -483,6 +483,8 @@ func (r *ReconcileCertMerge) updateDeployment(ctx context.Context, name, namespa
 	}
 
 	dep.Spec.Template.Annotations["certmerge.lecentre.net/timestamp"] = time.Now().Format(time.RFC3339)
+
+	log.Infof("Notifying deployment %s/%s", namespace, name)
 
 	if err := r.client.Update(ctx, dep); err != nil {
 		return err
