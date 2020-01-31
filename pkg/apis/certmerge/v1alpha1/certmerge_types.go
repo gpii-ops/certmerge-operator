@@ -33,11 +33,11 @@ func init() {
 
 // CertMergeSpec defines the desired state of CertMerge
 type CertMergeSpec struct {
-	Notify          []NotifySpec       `json:"notify"`
+	Notify          []NotifySpec       `json:"notify,omitempty"`
 	SecretName      string             `json:"name"`
-	Selector        []SecretSelector   `json:"selector"`
+	Selector        []SecretSelector   `json:"selector,omitempty"`
 	SecretNamespace string             `json:"namespace"`
-	SecretList      []SecretDefinition `json:"secretlist"`
+	SecretList      []SecretDefinition `json:"secretlist,omitempty"`
 }
 
 // NotifySpec defines resources to notify on cert update

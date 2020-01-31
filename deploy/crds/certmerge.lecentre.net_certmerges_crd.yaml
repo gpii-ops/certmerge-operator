@@ -125,9 +125,6 @@ spec:
           required:
           - name
           - namespace
-          - notify
-          - secretlist
-          - selector
           type: object
         status:
           description: CertMergeStatus defines the observed state of CertMerge
