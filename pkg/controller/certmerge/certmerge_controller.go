@@ -355,7 +355,7 @@ func (r *ReconcileCertMerge) Reconcile(request reconcile.Request) (reconcile.Res
 	}
 
 	// Check if the data needs to be updated
-	if ! cmp.Equal(found.Data, secret.Data) {
+	if !cmp.Equal(found.Data, secret.Data) {
 
 		// if the Secret already exist, Update it
 		log.WithFields(log.Fields{
