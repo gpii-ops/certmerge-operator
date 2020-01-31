@@ -354,22 +354,26 @@ func (r *ReconcileCertMerge) Reconcile(request reconcile.Request) (reconcile.Res
 		return emptyRes, err
 	}
 
-	// if the Secret already exist, Update it
-	log.WithFields(log.Fields{
-		"certmerge": instance.Name,
-		"namespace": instance.Namespace,
-	}).Infof("Updating Secret %s/%s\n", secret.Namespace, secret.Name)
+	// Check if the data needs to be updated
+	if ! cmp.Equal(found.Data, secret.Data) {
 
-	if err := r.client.Update(ctx, secret); err != nil {
+		// if the Secret already exist, Update it
 		log.WithFields(log.Fields{
 			"certmerge": instance.Name,
 			"namespace": instance.Namespace,
-		}).Errorf("Error updating Secret %s/%s - %v\n", secret.Namespace, secret.Name, err)
-		return emptyRes, err
-	}
+		}).Infof("Updating Secret %s/%s\n", secret.Namespace, secret.Name)
 
-	// Notify interested parties
-	r.notify(ctx, instance.Spec.Notify)
+		if err := r.client.Update(ctx, secret); err != nil {
+			log.WithFields(log.Fields{
+				"certmerge": instance.Name,
+				"namespace": instance.Namespace,
+			}).Errorf("Error updating Secret %s/%s - %v", secret.Namespace, secret.Name, err)
+			return emptyRes, err
+		}
+
+		// Notify interested parties
+		r.notify(ctx, instance.Spec.Notify)
+	}
 
 	return emptyRes, nil
 }
