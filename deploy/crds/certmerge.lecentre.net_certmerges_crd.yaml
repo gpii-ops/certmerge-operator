@@ -33,6 +33,22 @@ spec:
               type: string
             namespace:
               type: string
+            notify:
+              items:
+                description: NotifySpec defines resources to notify on cert update
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - name
+                - namespace
+                - type
+                type: object
+              type: array
             secretlist:
               items:
                 description: SecretDefinition defines the parameters to search for
@@ -109,8 +125,6 @@ spec:
           required:
           - name
           - namespace
-          - secretlist
-          - selector
           type: object
         status:
           description: CertMergeStatus defines the observed state of CertMerge

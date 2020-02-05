@@ -121,8 +121,12 @@ spec:
     namespace: default
   - name: test-tls-secret
     namespace: default
-  name: test-cert-merge
-  namespace: default
+  notify:
+  - name: istio-ingressgateway
+    namespace: istio-system
+    type: deployment
+  name: istio-ingressgateway
+  namespace: istio-system
 ```
 
 ### Selector
@@ -193,6 +197,22 @@ You can specify specific secrets to merge by listing them :
     namespace: default
   - name: test-secret-2
     namespace: prod
+```
+
+### Notify
+
+You can specify list of resources to notify about update. Currently the only
+supported type is `deployment`. Deployments are notified by updating
+`.spec.template.metadata.annotations.certmerge.lecentre.net/timestamp` property
+with a current timestamp, therefore triggering rolling update of the individual
+pods of the given Deployment. Typical use case is to notify Istio ingress
+gateway.
+
+```yaml
+    notify:
+    - name: istio-ingressgateway
+      namespace: istio-system
+      type: deployment
 ```
 
 ## Changelog
